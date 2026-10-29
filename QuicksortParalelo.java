@@ -2,6 +2,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class QuicksortParalelo {
     
@@ -12,7 +13,7 @@ public class QuicksortParalelo {
     Random rand = new Random();
     int[] array = new int[10];
     for (int i = 0; i < array.length; i++) {
-        array[i] = rand.nextInt(100);
+        array[i] = rand.nextInt(10000);
     }
     System.out.println("Antes: " + Arrays.toString(array));
     ForkJoinPool.commonPool().invoke(new QuicksortTask(array, 0, array.length - 1));
@@ -27,6 +28,7 @@ public static class QuicksortTask extends RecursiveAction {
     private int[] array;
     private int lowIndex;
     private int highIndex;
+    private int THRESHOLD = 5000;
 
     QuicksortTask(int[] array, int lowIndex, int highIndex){
         this.array = array;
@@ -39,8 +41,7 @@ protected void compute(){
     if (lowIndex >= highIndex) {
         return;
     }
-    Random rand = new Random();
-    int randa = rand.nextInt(highIndex - lowIndex + 1) + lowIndex;
+    int randa = ThreadLocalRandom.current().nextInt(lowIndex, highIndex + 1);
     swap(array, randa, highIndex);
     int pivo = array[highIndex];
     int ponteiroEsq = lowIndex;
@@ -58,9 +59,12 @@ protected void compute(){
     swap(array, ponteiroEsq, highIndex);
     QuicksortTask quickSort = new QuicksortTask(array, lowIndex, ponteiroEsq - 1);
     QuicksortTask quickSort2 = new QuicksortTask(array, ponteiroDir + 1, highIndex);
+    if (highIndex - lowIndex < THRESHOLD) {
+    quickSort.compute(); 
+    quickSort2.compute();
+} else {
     invokeAll(quickSort, quickSort2);
-
-
+}
 }
 public static void swap(int[] array, int index1, int index2){
     int temp = array[index1];
