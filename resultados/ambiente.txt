@@ -1,0 +1,9 @@
+java.version=24.0.2
+java.vendor=Oracle Corporation
+os.name=Windows 11
+os.arch=amd64
+processadores_logicos=12
+memoria_max_jvm_mb=4018
+tamanhos=[10000, 50000, 100000]
+threads=[2, 4, 8]
+amostras=5
